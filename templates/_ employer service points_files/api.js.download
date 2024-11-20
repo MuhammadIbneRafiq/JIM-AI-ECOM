@@ -1,0 +1,481 @@
+/*
+ * JavaScript API to generate WSP zipcode search
+ * @author Sander Edwards van Muijen <sander@cinnamon.nl>
+ * @copyright Copyright 2019, Cinnamon Interactive B.V 
+ */
+
+var $;
+var wsp = {
+  config: {
+    libraries: {
+      jquery: { url: 'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js', type: 'js', loaded: false },
+      jqueryui: { url: 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js', type: 'js', loaded: false },
+      //googlemaps: { url: 'https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyACyne3kGfHBRfqa8TnuXLN32KuvxSw2b0', type: 'js', loaded: false },
+      googlemaps: { url: 'https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyCSw_U0ZkhDng1XOEmvigAQK7OoDBezWw4', type: 'js', loaded: false },
+      jqueryuicss: { url: 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css', type: 'css', loaded: false },
+      wspapicss: { url: 'https://www.werkgeversservicepunten.nl/themes/api/css/styles.css', type: 'css', loaded: false }
+    },
+    template: '<div class="wsp-zipsearch-container">  <div class="search-wrapper">    <div class="headline block zipcode-text">      <div class="title">        <h1>Vind hier<br>uw regionale Werkgeversservicepunt</h1>      </div>    </div>    <div class="search-container block zipcode">      <h2>Postcode</h2>      <div class="search">        <input type="text" name="searchzip" id="searchzip" placeholder="1234AB..." />        <input type="button" id="searchzipbutton" value="Check" />      </div>    </div>  </div>    <div class="wsp-message">    <p>      Het werkgeverservicepunt (WSP) is een samenwerkingsverband van UWV, gemeenten en SW-bedrijven in de arbeidsmarktregio.<br />WSP is hét aanspreekpunt voor werkgevers in de regio die inclusief willen ondernemen.    </p>  </div>        <div id="wsp-map-wrapper">    <div id="wsp-map-canvas" class="block map"></div>    <div class="wsp-sidebar block list">      <h2>Werkgeversservicepunten</h2>      <div class="wsp-list">        <div class="inner-wrapper">          <div class="inner">                          <a data-wspid="15" id="list-wsp-item-15" class="list-wsp-item match" href="javascript:void(0);">WSP Achterhoek</a>                          <a data-wspid="8" id="list-wsp-item-8" class="list-wsp-item match" href="javascript:void(0);">WSP Amersfoort</a>                          <a data-wspid="16" id="list-wsp-item-16" class="list-wsp-item match" href="javascript:void(0);">WSP Drechtsteden: Baanbrekend Drechtsteden</a>                          <a data-wspid="20" id="list-wsp-item-20" class="list-wsp-item match" href="javascript:void(0);">WSP Drenthe</a>                          <a data-wspid="7" id="list-wsp-item-7" class="list-wsp-item match" href="javascript:void(0);">WSP Flevoland</a>                          <a data-wspid="17" id="list-wsp-item-17" class="list-wsp-item match" href="javascript:void(0);">WSP Foodvalley</a>                          <a data-wspid="33" id="list-wsp-item-33" class="list-wsp-item match" href="javascript:void(0);">WSP Friesland: Fryslân Werkt</a>                          <a data-wspid="32" id="list-wsp-item-32" class="list-wsp-item match" href="javascript:void(0);">WSP Gooi en Vechtstreek</a>                          <a data-wspid="23" id="list-wsp-item-23" class="list-wsp-item match" href="javascript:void(0);">WSP Gorinchem: Avregio</a>                          <a data-wspid="25" id="list-wsp-item-25" class="list-wsp-item match" href="javascript:void(0);">WSP Groningen: Werk in Zicht</a>                          <a data-wspid="9" id="list-wsp-item-9" class="list-wsp-item match" href="javascript:void(0);">WSP Groot-Amsterdam</a>                          <a data-wspid="14" id="list-wsp-item-14" class="list-wsp-item match" href="javascript:void(0);">WSP Haaglanden</a>                          <a data-wspid="48" id="list-wsp-item-48" class="list-wsp-item match" href="javascript:void(0);">WSP Helmond-De Peel</a>                          <a data-wspid="35" id="list-wsp-item-35" class="list-wsp-item match" href="javascript:void(0);">WSP Holland Rijnland</a>                          <a data-wspid="41" id="list-wsp-item-41" class="list-wsp-item match" href="javascript:void(0);">WSP Midden-Brabant</a>                          <a data-wspid="43" id="list-wsp-item-43" class="list-wsp-item match" href="javascript:void(0);">WSP Midden-Gelderland</a>                          <a data-wspid="24" id="list-wsp-item-24" class="list-wsp-item match" href="javascript:void(0);">WSP Midden-Holland</a>                          <a data-wspid="38" id="list-wsp-item-38" class="list-wsp-item match" href="javascript:void(0);">WSP Midden-Limburg</a>                          <a data-wspid="42" id="list-wsp-item-42" class="list-wsp-item match" href="javascript:void(0);">WSP Midden-Utrecht</a>                          <a data-wspid="6" id="list-wsp-item-6" class="list-wsp-item match" href="javascript:void(0);">WSP Noord-Holland Noord</a>                          <a data-wspid="44" id="list-wsp-item-44" class="list-wsp-item match" href="javascript:void(0);">WSP Noord-Limburg</a>                          <a data-wspid="13" id="list-wsp-item-13" class="list-wsp-item match" href="javascript:void(0);">WSP Noordoost-Brabant</a>                          <a data-wspid="37" id="list-wsp-item-37" class="list-wsp-item match" href="javascript:void(0);">WSP Rijk van Nijmegen</a>                          <a data-wspid="39" id="list-wsp-item-39" class="list-wsp-item match" href="javascript:void(0);">WSP Rijnmond</a>                          <a data-wspid="40" id="list-wsp-item-40" class="list-wsp-item match" href="javascript:void(0);">WSP Rivierenland</a>                          <a data-wspid="21" id="list-wsp-item-21" class="list-wsp-item match" href="javascript:void(0);">WSP Twente: Werkplein Twente</a>                          <a data-wspid="10" id="list-wsp-item-10" class="list-wsp-item match" href="javascript:void(0);">WSP Veluwe Stedendriehoek</a>                          <a data-wspid="11" id="list-wsp-item-11" class="list-wsp-item match" href="javascript:void(0);">WSP West-Brabant</a>                          <a data-wspid="45" id="list-wsp-item-45" class="list-wsp-item match" href="javascript:void(0);">WSP Zaanstreek-Waterland</a>                          <a data-wspid="22" id="list-wsp-item-22" class="list-wsp-item match" href="javascript:void(0);">WSP Zeeland: Aan de slag in Zeeland</a>                          <a data-wspid="46" id="list-wsp-item-46" class="list-wsp-item match" href="javascript:void(0);">WSP Zuid-Holland Centraal</a>                          <a data-wspid="27" id="list-wsp-item-27" class="list-wsp-item match" href="javascript:void(0);">WSP Zuid-Kennemerland en IJmond</a>                          <a data-wspid="29" id="list-wsp-item-29" class="list-wsp-item match" href="javascript:void(0);">WSP Zuid-Limburg</a>                          <a data-wspid="19" id="list-wsp-item-19" class="list-wsp-item match" href="javascript:void(0);">WSP Zuidoost-Brabant: 04werkt</a>                          <a data-wspid="47" id="list-wsp-item-47" class="list-wsp-item match" href="javascript:void(0);">WSP Zwolle</a>                        <div class="wsp-no-results">De ingevoerde postcode kent geen overeenkomsten met een Werkgeversservicepunt. Controleer of de postcode correct is ingevoerd. Als dit het geval is dan kunt u via <a href="/form/ontbrekende-postcode" target="_blank">dit formulier</a> de postcode doorgeven</div>          </div>        </div>      </div>      <div class="wsp-details">        <a href="javascript:void(0);" class="wsp-close-details">&Cross;</a>        <div class="wsp-details-container"></div>      </div>    </div>  </div>    <div class="wsp-nationwide-employer">    <span class="call-to-action">      <p><a href="/landelijk-werkgeversservicepunt" target="_blank" class="link">Bent u een landelijke werkgever?</a></p>              </span>  </div></div>',
+    activeWsp: false,
+    zipMatches: false,
+    map: false,
+    geocoder: false,
+    bounds: false,
+    markerMouseOut: 'https://www.werkgeversservicepunten.nl/themes/custom/wsp/images/icons/marker.png',
+    markerMouseOver: 'https://www.werkgeversservicepunten.nl/themes/custom/wsp/images/icons/marker-white.png',
+    markerMouseActive: 'https://www.werkgeversservicepunten.nl/themes/custom/wsp/images/icons/marker-active.png',
+    markerLoading: 'https://www.werkgeversservicepunten.nl/themes/custom/wsp/images/icons/marker-loading.png',
+    isLoading: false,
+    mapOverlay: false,
+    markers: {},
+    wsps: {"wsp_15":{"id":"15","title":"WSP Achterhoek","lat":"51.9550658","lng":"6.2996838","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-achterhoek","details":"<h2>WSP Achterhoek<\/h1><div class=\"details\">    <div class=\"address\">    Terborgseweg 136<br \/>7005 BD Doetinchem  <\/div>        <div class=\"phone\">        <a href=\"tel:0883650400\">      088 365 04 00    <\/a>  <\/div>                    <div class=\"municipalities\">    Aalten, Berkelland, Bronckhorst, Doetinchem, Montferland, Oost Gelre, Oude IJsselstreek, Winterswijk  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspachterhoek.nl\" target=\"_blank\">wspachterhoek.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspachterhoek.nl\">info@wspachterhoek.nl<\/a>  <\/div>  <\/div>"},"wsp_8":{"id":"8","title":"WSP Amersfoort","lat":"52.1543055","lng":"5.3810358","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-amersfoort","details":"<h2>WSP Amersfoort<\/h1><div class=\"details\">    <div class=\"address\">    Stadsring 75<br \/>3811 HN Amersfoort  <\/div>        <div class=\"phone\">        <a href=\"tel:0333303626\">      033 330 36 26    <\/a>  <\/div>                    <div class=\"municipalities\">    Amersfoort, Baarn, Bunschoten, Leusden, Nijkerk, Soest, Woudenberg  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspregioamersfoort.nl\" target=\"_blank\">wspregioamersfoort.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:wspregio@amersfoort.nl\">wspregio@amersfoort.nl<\/a>  <\/div>  <\/div>"},"wsp_16":{"id":"16","title":"WSP Drechtsteden: Baanbrekend Drechtsteden","lat":"51.8115784","lng":"4.6606148","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-drechtsteden-baanbrekend-drechtsteden","details":"<h2>WSP Drechtsteden: Baanbrekend Drechtsteden<\/h1><div class=\"details\">    <div class=\"address\">    Spuiboulevard 298<br \/>3311 GR Dordrecht  <\/div>        <div class=\"phone\">        <a href=\"tel:0787708770\">      078 770 87 70    <\/a>  <\/div>                    <div class=\"municipalities\">    Alblasserdam, Dordrecht, Hardinxveld-Giessendam, Hendrik-Ido-Ambacht, Papendrecht, Sliedrecht, Zwijndrecht  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.baanbrekenddrechtsteden.nl\" target=\"_blank\">baanbrekenddrechtsteden.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:baanbrekend@drechtsteden.nl\">baanbrekend@drechtsteden.nl<\/a>  <\/div>  <\/div>"},"wsp_20":{"id":"20","title":"WSP Drenthe","lat":"52.7909062","lng":"6.8970027","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-drenthe","details":"<h2>WSP Drenthe<\/h1><div class=\"details\">                        <div class=\"municipalities\">    Borger-Odoorn, Coevorden, De Wolden, Emmen, Hoogeveen, Midden-Drenthe  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspdrenthe.nl\" target=\"_blank\">wspdrenthe.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspdrenthe.nl\">info@wspdrenthe.nl<\/a>  <\/div>  <\/div>"},"wsp_7":{"id":"7","title":"WSP Flevoland","lat":"52.3717724","lng":"5.2192636","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-flevoland","details":"<h2>WSP Flevoland<\/h1><div class=\"details\">    <div class=\"address\">    Stadhuisplein 1<br \/>1315 HR Almere  <\/div>        <div class=\"phone\">        <a href=\"tel:0363630128\">      036 363 01 28    <\/a>  <\/div>                    <div class=\"municipalities\">    Almere, Dronten, Lelystad, Noordoostpolder, Urk  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.flevolandwerkt.info\" target=\"_blank\">flevolandwerkt.info<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:WerkgeversServicepunt-Flevoland@uwv.nl\">WerkgeversServicepunt-Flevoland@uwv.nl<\/a>  <\/div>  <\/div>"},"wsp_17":{"id":"17","title":"WSP Foodvalley","lat":"52.0459739","lng":"5.6704682","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-foodvalley","details":"<h2>WSP Foodvalley<\/h1><div class=\"details\">    <div class=\"address\">    Raadhuisplein 1<br \/>6711 DE Ede  <\/div>        <div class=\"phone\">        <a href=\"tel:0886606830\">      088 660 68 30    <\/a>  <\/div>                    <div class=\"municipalities\">    Barneveld, Ede, Renkum, Renswoude, Rhenen, Scherpenzeel, Veenendaal, Wageningen  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wsp-regiofoodvalley.nl\" target=\"_blank\">wsp-regiofoodvalley.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wsp-rfv.nl\">info@wsp-rfv.nl<\/a>  <\/div>  <\/div>"},"wsp_33":{"id":"33","title":"WSP Friesland: Frysl\u00e2n Werkt","lat":"53.1966315","lng":"5.7917906","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-friesland-fryslan-werkt","details":"<h2>WSP Friesland: Frysl\u00e2n Werkt<\/h1><div class=\"details\">    <div class=\"address\">    Bezoekadres: Heliconweg 62, 8914 AT Leeuwarden<br \/>Postadres: Postbus 21000, 8900 JA Leeuwarden  <\/div>        <div class=\"phone\">        <a href=\"tel:0582334042\">      058 233 40 42    <\/a>  <\/div>                    <div class=\"municipalities\">    Achtkarspelen, Ameland, Dantumadiel, De Fryske Marren, Harlingen, Heerenveen, Leeuwarden, Noardeast-Frysl\u00e2n, Ooststellingwerf, Opsterland, Schiermonnikoog, Smallingerland, S\u00fadwest-Frysl\u00e2n, Terschelling, Tytsjerksteradiel, Vlieland, Waadhoeke en Weststellingwerf  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.fryslanwerkt.nl\" target=\"_blank\">fryslanwerkt.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@fryslanwerkt.nl\">info@fryslanwerkt.nl<\/a>  <\/div>  <\/div>"},"wsp_32":{"id":"32","title":"WSP Gooi en Vechtstreek","lat":"52.2256332","lng":"5.1797933","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-gooi-en-vechtstreek","details":"<h2>WSP Gooi en Vechtstreek<\/h1><div class=\"details\">    <div class=\"address\">    Wilhelminastraat 1<br \/>1211 RH Hilversum  <\/div>        <div class=\"phone\">        <a href=\"tel:0353503174\">      035 350 31 74    <\/a>  <\/div>                    <div class=\"municipalities\">    Blaricum, Eemnes, Gooise Meren, Hilversum, Huizen, Laren, Weesp, Wijdemeren  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspgv.nl\" target=\"_blank\">wspgv.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspgv.nl\">info@wspgv.nl<\/a>  <\/div>  <\/div>"},"wsp_23":{"id":"23","title":"WSP Gorinchem: Avregio","lat":"51.8324857","lng":"4.9622453","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-gorinchem-avregio","details":"<h2>WSP Gorinchem: Avregio<\/h1><div class=\"details\">    <div class=\"address\">    Stadhuisplein 1<br \/>4201 AZ Gorinchem  <\/div>        <div class=\"phone\">        <a href=\"tel:0183751750\">      0183 75 17 50    <\/a>  <\/div>                    <div class=\"municipalities\">    Gorinchem, Molenlanden, Vijfheerenlanden  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspavregio.nl\" target=\"_blank\">wspavregio.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspavregio.nl\">info@wspavregio.nl<\/a>  <\/div>  <\/div>"},"wsp_25":{"id":"25","title":"WSP Groningen: Werk in Zicht","lat":"53.2051014","lng":"6.5851296","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-groningen-werk-zicht","details":"<h2>WSP Groningen: Werk in Zicht<\/h1><div class=\"details\">    <div class=\"address\">    Harm Buiterplein 1<br \/>9723 ZR Groningen  <\/div>        <div class=\"phone\">        <a href=\"tel:0507001202\">      050 700 12 02    <\/a>  <\/div>                    <div class=\"municipalities\">    Aa en Hunze, Assen, Eemsdelta, Het Hogeland, Groningen, Midden-Groningen, Noordenveld, Oldambt, Pekela, Stadskanaal, Tynaarlo, Veendam, Westerkwartier, Westerwolde  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.werkinzicht.nl\" target=\"_blank\">werkinzicht.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:werkgevers@werkinzicht.nl\">werkgevers@werkinzicht.nl<\/a>  <\/div>  <\/div>"},"wsp_9":{"id":"9","title":"WSP Groot-Amsterdam","lat":"52.3715399","lng":"4.8416479","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-groot-amsterdam","details":"<h2>WSP Groot-Amsterdam<\/h1><div class=\"details\">    <div class=\"address\">    Jan van Galenstraat 323<br \/>1056 CH Amsterdam  <\/div>        <div class=\"phone\">        <a href=\"tel:08005252525\">      0800 525 25 25    <\/a>  <\/div>                    <div class=\"municipalities\">    Aalsmeer, Amstelveen, Amsterdam, De Ronde Venen, Diemen, Haarlemmermeer, Ouder-Amstel, Uithoorn  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspgrootamsterdam.nl\" target=\"_blank\">wspgrootamsterdam.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspgrootamsterdam.nl\">info@wspgrootamsterdam.nl<\/a>  <\/div>  <\/div>"},"wsp_14":{"id":"14","title":"WSP Haaglanden","lat":"52.0508335","lng":"4.2532109","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-haaglanden","details":"<h2>WSP Haaglanden<\/h1><div class=\"details\">    <div class=\"address\">    Platinaweg 10<br \/>2544 EZ Den Haag  <\/div>        <div class=\"phone\">        <a href=\"tel:0707003335\">      070 700 33 35    <\/a>  <\/div>                    <div class=\"municipalities\">    Delft, \u2019s-Gravenhage, Midden-Delfland, Rijswijk, Westland  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wsphaaglanden.nl\" target=\"_blank\">wsphaaglanden.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:WerkgeversServicepunt-Haaglanden@uwv.nl\">WerkgeversServicepunt-Haaglanden@uwv.nl<\/a>  <\/div>  <\/div>"},"wsp_48":{"id":"48","title":"WSP Helmond-De Peel","lat":"51.4722803","lng":"5.6658751","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-helmond-de-peel","details":"<h2>WSP Helmond-De Peel<\/h1><div class=\"details\">    <div class=\"address\">    Churchilllaan 109<br \/>5705 BK Helmond  <\/div>        <div class=\"phone\">        <a href=\"tel:0492753303\">      0492 75 33 03    <\/a>  <\/div>                    <div class=\"municipalities\">    Asten, Deurne, Geldrop-Mierlo, Gemert-Bakel, Helmond, Laarbeek, Someren  <\/div>        <div class=\"website\">    <a href=\"https:\/\/wsphelmond-depeel.nl\/\" target=\"_blank\">WSP Helmond - De Peel<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wsphelmond-depeel.nl\">info@wsphelmond-depeel.nl<\/a>  <\/div>  <\/div>"},"wsp_35":{"id":"35","title":"WSP Holland Rijnland","lat":"52.1635941","lng":"4.4745406","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-holland-rijnland","details":"<h2>WSP Holland Rijnland<\/h1><div class=\"details\">    <div class=\"address\">    Le Pooleweg 11<br \/>2314 XT Leiden  <\/div>        <div class=\"phone\">        <a href=\"tel:0854000029\">      085 400 00 29    <\/a>  <\/div>                    <div class=\"municipalities\">    Alphen aan den Rijn, Hillegom, Kaag en Braassum, Katwijk, Leiden, Leiderdorp, Lisse, Nieuwkoop, Noordwijk, Oegstgeest, Teylingen, Zoeterwoude  <\/div>        <div class=\"website\">    <a href=\"http:\/\/www.wsphollandrijnland.nl\" target=\"_blank\">wsphollandrijnland.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wsphollandrijnland.nl\">info@wsphollandrijnland.nl<\/a>  <\/div>  <\/div>"},"wsp_41":{"id":"41","title":"WSP Midden-Brabant","lat":"51.5616439","lng":"5.0761543","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-midden-brabant","details":"<h2>WSP Midden-Brabant<\/h1><div class=\"details\">    <div class=\"address\">    Burgemeester Brokxlaan 1680<br \/>5041 SG Tilburg  <\/div>        <div class=\"phone\">        <span class=\"label\">Logistiek:<\/span>        <a href=\"tel:06-46032486\">      06-46 03 24 86    <\/a>  <\/div>        <div class=\"phone\">         <span class=\"label\">Leisure | Zakelijke dienstverlening:<\/span>        <a href=\"tel:06-22206456\">06-22 20 64 56<\/a>  <\/div>        <div class=\"phone\">        <span class=\"label\">Techniek:<\/span>        <a href=\"tel:06-52464423\">06-52 46 44 23<\/a>  <\/div>        <div class=\"phone\">        <span class=\"label\">Zorg en Welzijn:<\/span>        <a href=\"tel:06-52699246\">06-52 69 92 46<\/a>  <\/div>        <div class=\"municipalities\">    Alphen-Chaam, Baarle-Nassau, Dongen, Gilze en Rijen, Goirle, Heusden, Hilvarenbeek, Loon op Zand, Oisterwijk, Tilburg, Waalwijk  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspmiddenbrabant.nl\/\" target=\"_blank\">wspmiddenbrabant.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspmiddenbrabant.nl\">info@wspmiddenbrabant.nl<\/a>  <\/div>  <\/div>"},"wsp_43":{"id":"43","title":"WSP Midden-Gelderland","lat":"51.9851367","lng":"5.9761408","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-midden-gelderland","details":"<h2>WSP Midden-Gelderland<\/h1><div class=\"details\">    <div class=\"address\">    Bruningweg 10<br \/>6827 BM Arnhem  <\/div>        <div class=\"phone\">        <a href=\"tel:0267029600\">      026 702 96 00    <\/a>  <\/div>                    <div class=\"municipalities\">    Arnhem, Doesburg, Duiven, Lingewaard, Overbetuwe, Rheden, Rozendaal, Westervoort en Zevenaar  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wsp-mg.nl\" target=\"_blank\">wsp-mg.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wsp-mg.nl\">info@wsp-mg.nl<\/a>  <\/div>  <\/div>"},"wsp_24":{"id":"24","title":"WSP Midden-Holland","lat":"52.018","lng":"4.7051855","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-midden-holland","details":"<h2>WSP Midden-Holland<\/h1><div class=\"details\">    <div class=\"address\">    Burgemeester Jamesplein 1<br \/>2803 PG Gouda  <\/div>        <div class=\"phone\">        <a href=\"tel:0182700128\">      0182 70 01 28    <\/a>  <\/div>                    <div class=\"municipalities\">    Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen  <\/div>        <div class=\"website\">    <a href=\"https:\/\/wspmiddenholland.nl\/\" target=\"_blank\">wspmiddenholland.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspmiddenholland.nl\">info@wspmiddenholland.nl<\/a>  <\/div>  <\/div>"},"wsp_38":{"id":"38","title":"WSP Midden-Limburg","lat":"51.1979123","lng":"5.9832723","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-midden-limburg","details":"<h2>WSP Midden-Limburg<\/h1><div class=\"details\">    <div class=\"address\">    Kazerneplein 172-196<br \/>6041 TH Roermond  <\/div>        <div class=\"phone\">        <a href=\"tel:0475750880\">      0475 750 880    <\/a>  <\/div>                    <div class=\"municipalities\">    Cranendonck, Echt-Susteren, Leudal, Maasgouw, Nederweert, Roerdalen, Roermond, Weert  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wsp-ml.nl\" target=\"_blank\">wsp-ml.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:contact@wsp-ml.nl\">contact@wsp-ml.nl<\/a>  <\/div>  <\/div>"},"wsp_42":{"id":"42","title":"WSP Midden-Utrecht","lat":"52.0897577","lng":"5.1057767","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-midden-utrecht","details":"<h2>WSP Midden-Utrecht<\/h1><div class=\"details\">    <div class=\"address\">    Stadsplateau 1<br \/>3521 AZ Utrecht  <\/div>        <div class=\"phone\">        <a href=\"tel:0303002922\">      030 300 29 22    <\/a>  <\/div>                    <div class=\"municipalities\">    Bunnik, De Bilt, Houten, IJsselstein, Lopik, Montfoort, Nieuwegein, Oudewater, Stichtse Vecht,  Utrecht, Utrechtse Heuvelrug, Wijk bij Duurstede, Woerden, Zeist  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspmiddenutrecht.nl\/\" target=\"_blank\">www.wspmiddenutrecht.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:WerkgeversServicepunt-Utrecht-Midden@uwv.nl\">WerkgeversServicepunt-Utrecht-Midden@uwv.nl<\/a>  <\/div>  <\/div>"},"wsp_6":{"id":"6","title":"WSP Noord-Holland Noord","lat":"52.6357108","lng":"4.7437781","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-noord-holland-noord","details":"<h2>WSP Noord-Holland Noord<\/h1><div class=\"details\">        <div class=\"phone\">        <a href=\"tel:072\u20137003336\">      072 \u2013 700 33 36    <\/a>  <\/div>                    <div class=\"municipalities\">    Alkmaar, Bergen NH, Castricum, Den Helder, Drechterland, Enkhuizen, Heerhugowaard, Heiloo, Hollands Kroon, Hoorn, Koggenland Langedijk, Medemblik, Opmeer, Schagen, Stede Broec, Texel, Uitgeest  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wsp-nhn.nl\" target=\"_blank\">wsp-nhn.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:contact@wsp-nhn.nl\">contact@wsp-nhn.nl<\/a>  <\/div>  <\/div>"},"wsp_44":{"id":"44","title":"WSP Noord-Limburg","lat":"51.3687307","lng":"6.1618355","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-noord-limburg","details":"<h2>WSP Noord-Limburg<\/h1><div class=\"details\">    <div class=\"address\">    Hanzeplaats 1 Venlo<br \/>Postbus 3388, 5902 RJ Venlo  <\/div>        <div class=\"phone\">        <a href=\"tel:0777001894\">      077 700 18 94    <\/a>  <\/div>                    <div class=\"municipalities\">    Beesel, Bergen (L), Gennep, Horst aan de Maas, Peel en Maas, Venlo, Venray  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspnoordlimburg.nl\" target=\"_blank\">wspnoordlimburg.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:contact@wspnoordlimburg.nl\">contact@wspnoordlimburg.nl<\/a>  <\/div>  <\/div>"},"wsp_13":{"id":"13","title":"WSP Noordoost-Brabant","lat":"51.6873526","lng":"5.2889905","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-noordoost-brabant","details":"<h2>WSP Noordoost-Brabant<\/h1><div class=\"details\">    <div class=\"address\">    Vughterweg 47R<br \/>5211CK 's-Hertogenbosch  <\/div>        <div class=\"phone\">        <a href=\"tel:0851304062\">      085 13 040 62    <\/a>  <\/div>                    <div class=\"municipalities\">    Bernheze, Boekel, Boxtel, Land van Cuijk, \u2019s-Hertogenbosch, Maashorst, Meierijstad, Oss, Sint-Michielsgestel, Vught  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspnoordoostbrabant.nl\" target=\"_blank\">wspnoordoostbrabant.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspnob.nl\">info@wspnob.nl<\/a>  <\/div>  <\/div>"},"wsp_37":{"id":"37","title":"WSP Rijk van Nijmegen","lat":"51.8181505","lng":"5.815439","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-rijk-van-nijmegen","details":"<h2>WSP Rijk van Nijmegen<\/h1><div class=\"details\">    <div class=\"address\">    Nieuwe Dukenburgseweg 21<br \/>6534 AD Nijmegen  <\/div>        <div class=\"phone\">        <a href=\"tel:0242402947\">      024 240 29 47    <\/a>  <\/div>                    <div class=\"municipalities\">    Berg en Dal, Beuningen, Druten, Heumen, Mook en Middelaar, Nijmegen, Wijchen  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspnijmegen.nl\" target=\"_blank\">wspnijmegen.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspnijmegen.nl\">info@wspnijmegen.nl<\/a>  <\/div>  <\/div>"},"wsp_39":{"id":"39","title":"WSP Rijnmond","lat":"51.9279963","lng":"4.473088","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-rijnmond","details":"<h2>WSP Rijnmond<\/h1><div class=\"details\">    <div class=\"address\">    Schiekade 830<br \/>3032 AL Rotterdam  <\/div>        <div class=\"phone\">        <a href=\"tel:0107008989\">      010 700 89 89    <\/a>  <\/div>                    <div class=\"municipalities\">    Albrandswaard, Barendrecht, Capelle aan den IJssel, Goeree-Overflakkee, Hoeksche Waard, Krimpen aan den IJssel, Maassluis, Nissewaard, Ridderkerk, Rotterdam, Rotterdam Herenwaard, Rotterdam Schiekade, Schiedam, Vlaardingen, Voorne aan Zee, Zuidplas  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wsprijnmond.nl\" target=\"_blank\">wsprijnmond.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:WerkgeversServicepunt-Rijnmond@uwv.nl\">WerkgeversServicepunt-Rijnmond@uwv.nl<\/a>  <\/div>  <\/div>"},"wsp_40":{"id":"40","title":"WSP Rivierenland","lat":"51.885846","lng":"5.4323508","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-rivierenland","details":"<h2>WSP Rivierenland<\/h1><div class=\"details\">    <div class=\"address\">    Achterweg 2<br \/>4001 MV Tiel  <\/div>        <div class=\"phone\">        <a href=\"tel:0889375199\">      088 9375 199    <\/a>  <\/div>                    <div class=\"municipalities\">    Buren, Culemborg, Maasdriel, Neder-Betuwe, Tiel, West Betuwe, West Maas en Waal, Zaltbommel  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wsprivierenland.nl\/\" target=\"_blank\">WSP Rivierenland<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wsprivierenland.nl\">info@wsprivierenland.nl<\/a>  <\/div>  <\/div>"},"wsp_21":{"id":"21","title":"WSP Twente: Werkplein Twente","lat":"52.2230433","lng":"6.8896013","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-twente-werkplein-twente","details":"<h2>WSP Twente: Werkplein Twente<\/h1><div class=\"details\">    <div class=\"address\">    Hengelosestraat 51<br \/>7514 AD Enschede  <\/div>        <div class=\"phone\">        <a href=\"tel:0888969966\">      088 896 99 66    <\/a>  <\/div>                    <div class=\"municipalities\">    Almelo, Borne, Dinkelland, Enschede, Haaksbergen, Hellendoorn, Hengelo, Hof van Twente, Losser, Oldenzaal, Rijssen-Holten, Tubbergen, Twenterand, Wierden  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.werkpleintwente.nl\" target=\"_blank\">werkpleintwente.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@werkpleintwente.nl\">info@werkpleintwente.nl<\/a>  <\/div>  <\/div>"},"wsp_10":{"id":"10","title":"WSP Veluwe Stedendriehoek","lat":"52.2165076","lng":"5.9662594","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-veluwe-stedendriehoek","details":"<h2>WSP Veluwe Stedendriehoek<\/h1><div class=\"details\">    <div class=\"address\">    Deventerstraat 46<br \/>7311 LX Apeldoorn  <\/div>        <div class=\"phone\">        <a href=\"tel:0615061360\">      06 15 06 13 60    <\/a>  <\/div>                    <div class=\"municipalities\">    Apeldoorn, Brummen, Deventer, Epe, Ermelo, Harderwijk, Heerde, Lochem, Putten, Voorst, Zeewolde, Zutphen  <\/div>        <div class=\"website\">    <a href=\"https:\/\/werkcentrum-veluwe-stedendriehoek.nl\/werkgeversservicepunt-wsp\/\" target=\"_blank\">werkcentrum-veluwe-stedendriehoek.nl\/werkgeversservicepunt-wsp\/<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:werkcentrum@apeldoorn.nl\">werkcentrum@apeldoorn.nl<\/a>  <\/div>  <\/div>"},"wsp_11":{"id":"11","title":"WSP West-Brabant","lat":"51.5868766","lng":"4.7825314","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-west-brabant","details":"<h2>WSP West-Brabant<\/h1><div class=\"details\">    <div class=\"address\">    Claudius Prinsenlaan<br \/>4811 DK Breda  <\/div>        <div class=\"phone\">        <a href=\"tel:0800-0616\">      0800-0616    <\/a>  <\/div>                    <div class=\"municipalities\">    Altena, Bergen op Zoom, Breda, Drimmelen, Etten-Leur, Geertruidenberg, Halderberge, Moerdijk, Oosterhout, Roosendaal, Rucphen, Steenbergen, Woensdrecht, Zundert  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspwestbrabant.nl\" target=\"_blank\">www.wspwestbrabant.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:WerkgeversServicepunt-West-Brabant@uwv.nl\">WerkgeversServicepunt-West-Brabant@uwv.nl<\/a>  <\/div>  <\/div>"},"wsp_45":{"id":"45","title":"WSP Zaanstreek-Waterland","lat":"52.4384566","lng":"4.8124535","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-zaanstreek-waterland","details":"<h2>WSP Zaanstreek-Waterland<\/h1><div class=\"details\">    <div class=\"address\">    Stadhuisplein 100<br \/>1506 MZ Zaandam  <\/div>        <div class=\"phone\">        <a href=\"tel:0650527529\">      06 505 27 529    <\/a>  <\/div>                    <div class=\"municipalities\">    Beemster, Edam-Volendam, Landsmeer, Oostzaan, Purmerend, Waterland, Wormerland, Zaanstad  <\/div>        <div class=\"website\">    <a href=\"http:\/\/www.wspzaanstreek-waterland.nl\" target=\"_blank\">wspzaanstreek-waterland.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspzw.nl\">info@wspzw.nl<\/a>  <\/div>  <\/div>"},"wsp_22":{"id":"22","title":"WSP Zeeland: Aan de slag in Zeeland","lat":"51.501517","lng":"3.8877373","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-zeeland-aan-de-slag-zeeland","details":"<h2>WSP Zeeland: Aan de slag in Zeeland<\/h1><div class=\"details\">    <div class=\"address\">    Postbus 2118<br \/>4460 MC Goes  <\/div>        <div class=\"phone\">        <a href=\"tel:0113249658\">      0113 24 96 58    <\/a>  <\/div>                    <div class=\"municipalities\">    Borsele, Goes, Hulst, Kapelle, Middelburg, Noord-Beveland, Reimerswaal, Schouwen-Duiveland, Sluis, Terneuzen, Tholen, Veere, Vlissingen  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.aandeslaginzeeland.nl\" target=\"_blank\">aandeslaginzeeland.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@aandeslaginzeeland.nl\">info@aandeslaginzeeland.nl<\/a>  <\/div>  <\/div>"},"wsp_46":{"id":"46","title":"WSP Zuid-Holland Centraal","lat":"52.060159","lng":"4.4911905","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-zuid-holland-centraal","details":"<h2>WSP Zuid-Holland Centraal<\/h1><div class=\"details\">    <div class=\"address\">    Markt 3<br \/>2711 CZ Zoetermeer  <\/div>        <div class=\"phone\">        <a href=\"tel:0883920200\">      088 392 02 00    <\/a>  <\/div>                    <div class=\"municipalities\">    Lansingerland, Leidschendam-Voorburg, Pijnacker-Nootdorp, Voorschoten, Wassenaar, Zoetermeer  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.zhcwerkt.nl\" target=\"_blank\">zhcwerkt.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@zhcwerkt.nl\">info@zhcwerkt.nl<\/a>  <\/div>  <\/div>"},"wsp_27":{"id":"27","title":"WSP Zuid-Kennemerland en IJmond","lat":"52.3833373","lng":"4.6266784","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-zuid-kennemerland-en-ijmond","details":"<h2>WSP Zuid-Kennemerland en IJmond<\/h1><div class=\"details\">    <div class=\"address\">    Zijlsingel 1<br \/>2013 DN Haarlem  <\/div>        <div class=\"phone\">        <a href=\"tel:0885019191\">      088 501 91 91    <\/a>  <\/div>                    <div class=\"municipalities\">    Beverwijk, Bloemendaal, Haarlem, Heemskerk, Heemstede, Velsen, Zandvoort  <\/div>        <div class=\"website\">    <a href=\"https:\/\/www.wspzkij.nl\/\" target=\"_blank\">wspzkij.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspzkij.nl\">info@wspzkij.nl<\/a>  <\/div>  <\/div>"},"wsp_29":{"id":"29","title":"WSP Zuid-Limburg","lat":"50.8918434","lng":"5.9722093","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-zuid-limburg","details":"<h2>WSP Zuid-Limburg<\/h1><div class=\"details\">    <div class=\"address\">    Avenue C\u00e9ramique 50<br \/>6221 KV Maastricht  <\/div>        <div class=\"phone\">        <a href=\"tel:0850603213\">      085 06 03 213    <\/a>  <\/div>                    <div class=\"municipalities\">    Beek, Beekdaelen, Brunssum, Eijsden-Margraten, Gulpen-Wittem, Heerlen, Kerkrade, Landgraaf, Maastricht, Meerssen, Simpelveld, Sittard-Geleen, Stein, Vaals, Valkenburg aan de Geul, Voerendaal  <\/div>        <div class=\"website\">    <a href=\"https:\/\/werkcentrum-zuidlimburg.nl\/\" target=\"_blank\">https:\/\/werkcentrum-zuidlimburg.nl\/<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@werkcentrum-zuidlimburg.nl\">info@werkcentrum-zuidlimburg.nl<\/a>  <\/div>  <\/div>"},"wsp_19":{"id":"19","title":"WSP Zuidoost-Brabant: 04werkt","lat":"51.4447579","lng":"5.4710296","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-zuidoost-brabant-04werkt","details":"<h2>WSP Zuidoost-Brabant: 04werkt<\/h1><div class=\"details\">    <div class=\"address\">    Pastoor Petersstraat 134-166<br \/>5612 LV Eindhoven  <\/div>        <div class=\"phone\">        <a href=\"tel:0407004038\">      040 700 40 38    <\/a>  <\/div>                    <div class=\"municipalities\">    Bergeijk, Best, Bladel, Eersel, Eindhoven, Heeze-Leende, Nuenen CA, Oirschot, Reusel-De Mierden, Son en Breugel, Valkenswaard, Veldhoven, Waalre  <\/div>        <div class=\"website\">    <a href=\"http:\/\/www.huisnaarwerk.nl\/\" target=\"_blank\">www.huisnaarwerk.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@04werkt.nl\">info@04werkt.nl<\/a>  <\/div>  <\/div>"},"wsp_47":{"id":"47","title":"WSP Zwolle","lat":"52.5037621","lng":"6.0849164","url":"https:\/\/www.werkgeversservicepunten.nl\/wsp\/wsp-zwolle","details":"<h2>WSP Zwolle<\/h1><div class=\"details\">    <div class=\"address\">    Hanzelaan 180<br \/>8017 JG Zwolle  <\/div>        <div class=\"phone\">        <a href=\"tel:0387001205\">      038 700 12 05    <\/a>  <\/div>                    <div class=\"municipalities\">    Elburg, Dalfsen, Hardenberg, Hattem, Kampen, Meppel, Nunspeet, Oldebroek, Olst-Wijhe, Ommen, Raalte, Staphorst, Steenwijkerland, Westerveld, Zwartewaterland, Zwolle  <\/div>        <div class=\"website\">    <a href=\"https:\/\/wspregiozwolle.nl\/\" target=\"_blank\">wspregiozwolle.nl<\/a>  <\/div>         <div class=\"email\">    <a href=\"mailto:info@wspregiozwolle.nl\">info@wspregiozwolle.nl<\/a>  <\/div>  <\/div>"}}
+  },
+  init: function() {
+    // check if jquery and jquery-ui are already loaded
+    if(typeof($) !== 'undefined') {
+      wsp.config.libraries.jquery.loaded = true;
+      
+      if(typeof($.ui) !== 'undefined') {
+        wsp.config.libraries.jqueryui.loaded = true;
+        wsp.config.libraries.jqueryuicss.loaded = true;
+      }
+    }
+    
+    // include required libraries
+    for(libraryName in wsp.config.libraries) {
+      library = wsp.config.libraries[libraryName];
+      if(!library.loaded) {
+        switch(library.type) {
+          case 'js':
+            var tag = document.createElement('script');
+            tag.setAttribute('src', library.url);
+            tag.setAttribute('type', 'text/javascript');
+            break;
+            
+          case 'css':
+            var tag = document.createElement('link');
+            tag.setAttribute('rel', 'stylesheet');
+            tag.setAttribute('style', 'text/css');
+            tag.setAttribute('href', library.url);
+            break;
+        }
+      
+        tag.setAttribute('data-label', libraryName);
+        tag.onload = function() {
+          wsp.checkLoaded(this.getAttribute('data-label'));
+        }
+        document.getElementsByTagName("head")[0].appendChild(tag);
+      }
+    }
+  },
+  checkLoaded: function(type) {
+    // if jquery is loaded, set global $ variable
+    if(type == 'jquery') {
+      $ = window.jQuery;
+    }
+    
+    // set library as loaded
+    if(typeof(wsp.config.libraries[type]) != 'undefined') {
+      wsp.config.libraries[type].loaded = true;
+    }
+    
+    // if all libraries are loaded, continue application
+    var allLoaded = true;
+    for(libraryName in wsp.config.libraries) {
+      if(!wsp.config.libraries[libraryName].loaded) {
+        allLoaded = false;
+      }
+    }
+    if(allLoaded) {
+      wsp.initAPI();
+    }
+  },
+  initAPI: function() {
+    // check if container div is present
+    if($('#wsp-zipsearch-container').length > 0) {
+      $('#wsp-zipsearch-container').append($.parseHTML(wsp.config.template));
+      
+      wsp.initZipSearch();
+      wsp.initMap();
+      wsp.initList();
+    }
+  },
+  initZipSearch: function() {
+    $('#searchzipbutton').click(function() {
+      $([document.documentElement, document.body]).animate({
+        scrollTop: $('#wsp-map-wrapper').offset().top
+      }, 200);
+    });
+    
+    // close activated wsp when escape is pressed
+    $(document).keyup(function(event) {
+      if(event.key === 'Escape') {
+        wsp.activateWsp();
+      }
+    });
+    
+    $('#searchzip').keyup(function(event) {
+      var correctValue = '';
+      var value = $(this).val().toUpperCase().replace(/[^A-Z0-9]/, '').substr(0,6);
+
+      for(var i=0; i<value.length; i++) {
+        if(i < 4 && value.charAt(i).match(/[^0-9]/) != null) {
+          break;
+        } else if(i > 3 && value.charAt(i).match(/[^A-Z]/) != null) {
+          break;
+        } else {
+          correctValue += value.charAt(i);
+        }
+      }
+
+      if($(this).val() != correctValue) {
+        $(this).val(correctValue);
+      }
+      
+      if($(this).val() != '') {
+        $.get("https://www.werkgeversservicepunten.nl/wsp-api/search/" + $(this).val(), {}, function (data) {
+          wsp.config.zipMatches = data;
+
+          // show matching items in list
+          $('.wsp-sidebar .wsp-list a.list-wsp-item').each(function(k, item) {
+            var wspid = $(item).attr('data-wspid');
+            if($.inArray(wspid, data) > -1) {
+              $(item).addClass('match');
+            } else {
+              $(item).removeClass('match');
+            }
+          });
+
+          // show matching items on map
+          $.each(wsp.config.markers, function(id, marker) {
+            if($.inArray(id, data) > -1) {
+              marker.setVisible(true);
+            } else {
+              marker.setVisible(false);
+            }
+          });
+          
+          wsp.scrollPos();
+          
+          if(data.length == 1) {
+            wsp.activateWsp(data[0]);
+          } else {
+            wsp.activateWsp();
+          }
+          
+          if(data.length < 1) {
+            $('.wsp-no-results').show();
+          } else {
+            $('.wsp-no-results').hide();
+          }
+        });
+      } else {
+        // searchfield is empty: show all
+        wsp.activateWsp();
+        $('.wsp-sidebar .wsp-list a.list-wsp-item').addClass('match');
+        $.each(wsp.config.markers, function(id, marker) {
+          marker.setVisible(true);
+        });
+      }
+      
+      // enter pressed?
+      if(event.key === 'Enter') {
+        if(typeof(wsp.config.zipMatches) == 'object' && wsp.config.zipMatches.length == 1) {
+          wspid = wsp.config.zipMatches[0];
+          if($('#list-wsp-item-' + wspid).length > 0) {
+            wsp.activateWsp(wspid);
+            $('#searchzipbutton').click();
+          }
+        }
+      }
+    });
+  },
+  initMap: function() {
+    wsp.config.infoWindow = new google.maps.InfoWindow({ disableAutoPan: true });
+    wsp.mapOverlay.prototype = new google.maps.OverlayView();
+    wsp.mapOverlay.prototype.onAdd = function() {
+      var div = document.createElement('div');
+      div.style.borderStyle = 'none';
+      div.style.borderWidth = '0px';
+      div.style.position = 'absolute';
+
+      var img = document.createElement('img');
+      img.src = this.image_;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.position = 'absolute';
+      div.appendChild(img);
+
+      this.div_ = div;
+
+      var panes = this.getPanes();
+      panes.overlayLayer.appendChild(div);
+    };
+
+    wsp.mapOverlay.prototype.draw = function() {
+      var overlayProjection = this.getProjection();
+      var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
+      var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
+      var div = this.div_;
+      div.style.left = sw.x + 'px';
+      div.style.top = ne.y + 'px';
+      div.style.width = (ne.x - sw.x) + 'px';
+      div.style.height = (sw.y - ne.y) + 'px';
+    };
+
+    wsp.mapOverlay.prototype.onRemove = function() {
+      this.div_.parentNode.removeChild(this.div_);
+      this.div_ = null;
+    };
+
+    wsp.doInitMap();
+  },
+  doInitMap: function() {
+    var mapOptions = {
+      center: new google.maps.LatLng(52.1243423,5.274014),
+      zoom: 7.8,
+      mapTypeId: google.maps.MapTypeId.MAP,
+      backgroundColor: 'transparent',
+      disableDefaultUI: true,
+      draggable: false,
+      scaleControl: false,
+      scrollwheel: false,
+      gestureHandling: 'none',
+      draggableCursor: 'default',
+      styles: [
+        {"featureType": "transit", "stylers": [{ "visibility": "off" }]},
+        {"featureType": "water", "stylers": [{ "visibility": "off" }]},
+        {"featureType": "landscape", "stylers": [{ "visibility": "off" }]},
+        {"featureType": "road", "stylers": [{ "visibility": "off" }]},
+        {"featureType": "administrative", "stylers": [{ "visibility": "off" }]},
+        {"featureType": "poi", "stylers": [{ "visibility": "off" }]},
+        {"elementType": "labels", "stylers": [{ "visibility": "off" }]}
+      ]
+    };
+
+    wsp.config.map = new google.maps.Map(document.getElementById('wsp-map-canvas'), mapOptions);
+    wsp.config.geocoder = new google.maps.Geocoder();
+
+    wsp.config.bounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng(50.73, 3.34),
+      new google.maps.LatLng(53.56, 7.2)
+    );
+
+    wsp.config.mapOverlay = new wsp.mapOverlay(wsp.config.bounds, 'https://www.werkgeversservicepunten.nl/themes/custom/wsp/images/nl.svg', wsp.config.map);
+    if(typeof(wsp.config.wsps) == 'object') {
+      $.each(wsp.config.wsps, function(k, wspItem) {
+        var icon = {
+          url: wsp.config.markerMouseOut,
+          scaledSize: new google.maps.Size(27, 38)
+        }
+          
+        wsp.config.markers[wspItem.id] = new google.maps.Marker({
+          position: new google.maps.LatLng(wspItem.lat, wspItem.lng),
+          map: wsp.config.map,
+          wspTitle: wspItem.title,
+          wspid: wspItem.id,
+          icon: icon,
+          url: wspItem.url
+        });
+        wsp.config.markers[wspItem.id].addListener('click', function() {
+          wsp.activateWsp(this.wspid);
+        });
+        wsp.config.markers[wspItem.id].addListener('mouseover', function() {
+          wsp.hoverWsp(this.wspid, true);
+        });
+        wsp.config.markers[wspItem.id].addListener('mouseout', function() {
+          wsp.hoverWsp();
+        });
+      });
+    }
+
+    $(window).resize(function() {
+      google.maps.event.trigger(wsp.config.map, 'resize');
+    });
+    setInterval(function() {
+      $(window).resize();
+    }, 100);
+
+    google.maps.event.addListener(wsp.config.map, 'resize', function() {
+      var width  = $('#wsp-map-wrapper').width();
+      var height = $('#wsp-map-wrapper').height();
+      if(width >= 1024) { // Map is never this big
+        wsp.config.map.setZoom(7.8);
+      } else if(width >= 975) { // Map is never this big
+        var factor = (width - 975) / ((1280-975) / 100);
+        zoom = 7.5 + ((0.3/100) * factor);
+        zoom = Math.floor(zoom*100)/100;
+        wsp.config.map.setZoom(zoom);
+      } else if(width >= 719) { // 768vw
+        wsp.config.map.setZoom(7.8);
+      } else if(width >= 431) { // 480vw
+        wsp.config.map.setZoom(7.2);
+      } else if(width >= 271) { // 320vw
+        wsp.config.map.setZoom(6.6);
+      } else { // Less then 320vw
+        wsp.config.map.fitBounds(wsp.config.bounds);
+      }
+    });
+    
+    // hide google stuff on bottom of map
+    setInterval(function() {
+      $('.gm-style a, .gmnoprint a, .gmnoprint span, .gm-style-cc').remove();
+      $('.gmnoprint div').css({ background: 'none !important' });
+    }, 500);
+  },
+  hoverWsp: function(wspid, scrollToItem) {
+    // Check if touch device
+    var touchPrefixes = ' -webkit- -moz- -o- -ms- '.split(' ');
+    var mq = function (touchQuery) {
+      return window.matchMedia(touchQuery).matches;
+    }
+    var isTouch = false;
+    if (('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) {
+      isTouch = true;
+    } else {
+      var touchQuery = ['(', touchPrefixes.join('touch-enabled),('), 'heartz', ')'].join('');
+      isTouch = mq(touchQuery);
+    }
+
+    if (!isTouch) {
+      if(typeof(scrollToItem) == 'undefined' || scrollToItem !== true) {
+        scrollToItem = false;
+      }
+      
+      if(typeof(wspid) == 'undefined') {
+        wspid = 0;
+      } else {
+        wspid = parseInt(wspid);
+      }
+
+      $('.list-wsp-item').removeClass('hovering');
+      $('#list-wsp-item-' + wspid).addClass('hovering');
+
+      if(!wsp.config.isLoading) {
+        var listInnerWrapper = $('div.wsp-sidebar div.wsp-list div.inner-wrapper');
+        var scrollTop = null;
+        
+        $.each(wsp.config.markers, function(id, marker) {
+          if(id != wsp.config.activeWsp) {
+            if(id == wspid) {
+              var item = $('#list-wsp-item-' + id);
+              if($(item).length > 0) {
+                scrollTop = $(item).position().top;
+              }
+              
+              var icon = {
+                url: wsp.config.markerMouseOver,
+                scaledSize: new google.maps.Size(35, 50)
+              }
+            } else {
+              var icon = {
+                url: wsp.config.markerMouseOut,
+                scaledSize: new google.maps.Size(27, 38)
+              }
+            }
+            marker.setIcon(icon);
+          }
+        });
+        
+        if(scrollToItem && scrollTop !== null) {
+          var liScrollTop = $(listInnerWrapper).scrollTop();
+          scrollTop += liScrollTop;
+          //if(scrollTop < liScrollTop || scrollTop > liScrollTop+$(listInnerWrapper).height()) {
+            $(listInnerWrapper).scrollTop(scrollTop-50);
+          //}
+        }
+
+        if(typeof(wsp.config.markers[wspid]) != 'undefined') {
+          wsp.config.infoWindow.setContent(wsp.config.markers[wspid].wspTitle);
+          wsp.config.infoWindow.open(wsp.config.map, wsp.config.markers[wspid]);
+        } else {
+          wsp.config.infoWindow.setContent('');
+          wsp.config.infoWindow.close();
+        }
+      }
+    }
+  },
+  activateWsp: function(wspid) {
+    if($('#list-wsp-item-' + wspid).length > 0) {
+      if(wspid != wsp.config.activeWsp) {
+        wsp.config.activeWsp = wspid;
+        var html = $.parseHTML(wsp.config.wsps['wsp_' + wspid].details);
+        $('.wsp-sidebar .wsp-details-container').html(html);
+        $('.wsp-sidebar').addClass('details').removeClass('list');
+      }
+    } else {
+      wsp.config.activeWsp = 0;
+      $('.wsp-sidebar .wsp-details-container').html('');
+      $('.wsp-sidebar').addClass('list').removeClass('details');
+    }
+    
+    $.each(wsp.config.markers, function(id, marker) {
+      if(id == wspid) {
+        var icon = {
+          url: wsp.config.markerMouseOver,
+          scaledSize: new google.maps.Size(35, 50)
+        }
+      } else {
+        var icon = {
+          url: wsp.config.markerMouseOut,
+          scaledSize: new google.maps.Size(27, 38)
+        }
+      }
+      marker.setIcon(icon);
+    });
+  },
+  initList: function() {
+    $('div.wsp-list a.list-wsp-item').mouseover(function() {
+      wsp.hoverWsp($(this).attr('data-wspid'));
+    }).mouseout(function() {
+      wsp.hoverWsp();
+    }).click(function() {
+      wsp.activateWsp($(this).attr('data-wspid'));
+    });
+    $('.wsp-sidebar .wsp-details a.wsp-close-details').click(function() {
+      wsp.activateWsp();
+    });
+    
+    $('#wsp-map-wrapper div.wsp-sidebar div.inner-wrapper').scroll(function() {
+      wsp.scrollPos();
+    });
+    wsp.scrollPos();
+  },
+  scrollPos: function() {
+    var $ = jQuery;
+
+    var overflowHeight = $('#wsp-map-wrapper div.wsp-sidebar div.inner-wrapper').height();
+    var scrollPos = $('#wsp-map-wrapper div.wsp-sidebar div.inner-wrapper').scrollTop();
+    var totalHeight =  $('#wsp-map-wrapper div.wsp-sidebar div.inner-wrapper div.inner').height();
+    
+    if(totalHeight == overflowHeight) {
+      var noScroll = true;
+    } else {
+      var scrollPercentage = 100 / Math.floor( totalHeight - overflowHeight ) * scrollPos;
+      var noScroll = false;
+    }
+
+    if (scrollPercentage <= 0 || noScroll) {
+      $('#wsp-map-wrapper div.wsp-sidebar div.wsp-list').addClass('pos_top');
+    } else {
+      $('#wsp-map-wrapper div.wsp-sidebar div.wsp-list').removeClass('pos_top');
+    }
+
+    if (scrollPercentage >= 99 || noScroll) {
+      $('#wsp-map-wrapper div.wsp-sidebar div.wsp-list').addClass('pos_bot');
+    } else {
+      $('#wsp-map-wrapper div.wsp-sidebar div.wsp-list').removeClass('pos_bot');
+    }
+  },
+  mapOverlay: function(bounds, image, map) {
+    this.bounds_ = bounds;
+    this.image_ = image;
+    this.map_ = map;
+    this.div_ = null;
+    this.setMap(map);
+  }
+}
+
+window.onload = function() {
+  wsp.init();
+}

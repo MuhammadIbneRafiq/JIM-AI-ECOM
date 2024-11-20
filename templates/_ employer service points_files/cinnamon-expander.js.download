@@ -1,0 +1,257 @@
+/* 
+Created on : Mar 16, 2020, 16:09:55 AM
+Author     : Sander Edwards van Muijen <sander@cinnamon.nl>
+
+---
+Example HTML structure:
+
+<div
+	class="cin-expander-wrapper"
+	data-allowmulti="true"
+	data-allowclose="true"
+>
+	<div
+		class="cin-expander"
+		data-beforeanimate="functionName"
+		data-afteranimate="functionName"
+		data-cin-expander-closed-height="250"
+		data-cin-expander-open-height="400"
+	>
+		<div class="cin-clicker">
+			<h2>This is the title</h2>
+		</div>
+
+		<div class="cin-collapser">
+			Sed mollis, eros et ultrices tempus, mauris ipsum aliquam libero, non adipiscing dolor urna a orci. Nulla neque dolor, sagittis eget, iaculis quis, molestie non, velit. Fusce fermentum odio nec arcu. Pellentesque auctor neque nec urna. Quisque id mi.<br /><br />
+			Phasellus accumsan cursus velit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Phasellus tempus. Sed magna purus, fermentum eu, tincidunt eu, varius ut, felis.
+		</div>
+	</div>
+</div>
+*/
+(function($, Drupal, drupalSettings, window, document, undefined) {
+    Drupal.behaviors.cinExpander = {
+        attach: function attach(context) {
+            jQuery(document).ready(function ($) {
+                cinExpander.init();
+            });
+        }
+    }
+})(jQuery, Drupal, drupalSettings, this, this.document, undefined);
+
+var cinExpander = {
+    wrapperSelector: '.cin-expander-wrapper',
+    expanderSelector: '.cin-expander',
+    clickerSelector: '.cin-clicker',
+    collapserSelector: '.cin-collapser',
+    animationDuration: 400,
+    init: function() {
+        var $ = jQuery;
+
+        $(cinExpander.wrapperSelector).each(function(k1, wrapper) {
+            $(wrapper).attr('data-cin-expander-wrapper-number', k1+1);
+            $(wrapper).children(cinExpander.expanderSelector).each(function(k2, obj) {
+                $(obj).attr('data-cin-expander-number', k2+1);
+
+                $(obj).children(cinExpander.clickerSelector).each(function(k3, clicker) {
+                    $(clicker).attr('tabindex', 0);
+                    $(clicker).on('click keypress', function(e) {
+                        var config = cinExpander.expanderConfig($(this).closest(cinExpander.wrapperSelector));
+
+                        if(e.type == 'click' || (e.type == 'keypress' && $.inArray(e.key, ['Enter', ' ']) > -1)) {
+                            e.preventDefault();
+                            var element = $(this).closest(cinExpander.expanderSelector);
+                            if(!$(element).hasClass('animating')) {
+                                if($(element).hasClass('open')) {
+                                  if(config.allowClose) {
+                                    cinExpander.close(element);
+                                  }
+                                } else {
+                                    cinExpander.open(element);
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+        });
+
+        $(document).keydown(function(e) {
+          if(e.key == 'Escape') {
+            cinExpander.closeAll();
+          }
+        });
+    },
+    closeAll: function() {
+        var $ = jQuery;
+
+        $(cinExpander.wrapperSelector).each(function(k1, wrapper) {
+            $(wrapper).children(cinExpander.expanderSelector).each(function(k2, obj) {
+                $(obj).children(cinExpander.clickerSelector).each(function(k3, clicker) {
+                    var element = $(clicker).closest(cinExpander.expanderSelector);
+                    if($(element).hasClass('open')) {
+                        cinExpander.close(element);
+                    }
+                });
+            });
+        });
+    },
+    expanderConfig(element) {
+        var $ = jQuery;
+        var wrapper = $(element).closest(cinExpander.wrapperSelector);
+        
+        var config = {
+            allowMulti: true,
+            allowClose: true
+        }
+        if ($(wrapper).length > 0) {
+          if(typeof($(wrapper).attr('data-allowmulti')) != 'undefined' && $.inArray($(wrapper).attr('data-allowmulti'), ['false', '0', false, 0]) > -1) {
+            config.allowMulti = false;
+          }
+          if(typeof($(wrapper).attr('data-allowclose')) != 'undefined' && $.inArray($(wrapper).attr('data-allowclose'), ['false', '0', false, 0]) > -1) {
+            config.allowClose = false;
+          }
+        }
+        
+        return config;
+    },
+    open: function(element) {
+        var $ = jQuery;
+
+        if($(element).hasClass('animating') || $(element).hasClass('open')) {
+            return false;
+        }
+        
+        var config = cinExpander.expanderConfig(element);
+        
+        if(typeof($(element).attr('data-cin-expander-closed-height')) != 'undefined') {
+          var startHeight = parseFloat($(element).attr('data-cin-expander-closed-height'));
+        } else {
+          var startHeight = $(element).children(cinExpander.clickerSelector).outerHeight();
+        }
+
+        if(typeof($(element).attr('data-cin-expander-open-height')) != 'undefined') {
+          var targetHeight = parseFloat($(element).attr('data-cin-expander-open-height'));
+        } else {
+          var targetHeight = startHeight + $(element).children(cinExpander.collapserSelector).outerHeight();
+        }
+
+        var beforeAnimate = $(element).attr('data-beforeanimate');
+        if(typeof(beforeAnimate) != 'undefined' && typeof(window[beforeAnimate]) == 'function') {
+            if(!window[beforeAnimate](element, 'open', {
+                element: element,
+                state: 'open',
+                startHeight: startHeight,
+                targetHeight: targetHeight
+            }) === false) {
+                return false;
+            }
+        }
+
+        //console.log('Opening: ' + startHeight + ' > ' + targetHeight);
+
+        $(element)
+            .stop(true, true)
+            .addClass('animating opening')
+            .css({
+                'height': startHeight + 'px'
+            })
+            .animate(
+                {
+                    height: targetHeight + 'px'
+                },
+                cinExpander.animationDuration,
+                'linear',
+                function() {
+                    $(cinExpander.clickerSelector, this).attr('aria-expanded', true);
+                    
+                    $(this)
+                        .removeAttr('style')
+                        .addClass('open')
+                        .removeClass('animating opening');
+
+                    var afterAnimate = $(this).attr('data-afteranimate');
+                    if(typeof(window[afterAnimate]) == 'function') {
+                        window[afterAnimate](this, 'open');
+                    }
+                }
+            );
+        
+        if(!config.allowMulti) {
+            $(element).closest(cinExpander.wrapperSelector).children(cinExpander.expanderSelector).each(function(k, expander) {
+                if($(expander).attr('data-cin-expander-number') != $(element).attr('data-cin-expander-number')) {
+                    cinExpander.close(expander, true);
+                }
+            });
+        }
+
+        return true;
+    },
+    close: function(element, force) {
+        var $ = jQuery;
+
+        force = (typeof(force) != 'undefined' && $.inArray(force, [true, 'true', 1, '1']) > -1);
+
+        if(!$(element).hasClass('open')) {
+          if($(element).hasClass('opening') && force) {
+            $(element).stop(true, true);
+          } else {
+            return false;
+          }
+        }
+        
+        if(typeof($(element).attr('data-cin-expander-closed-height')) != 'undefined') {
+          var targetHeight = parseFloat($(element).attr('data-cin-expander-closed-height'));
+        } else {
+          var targetHeight = $(element).children(cinExpander.clickerSelector).outerHeight();
+        }
+
+        if(typeof($(element).attr('data-cin-expander-open-height')) != 'undefined') {
+          var startHeight = parseFloat($(element).attr('data-cin-expander-open-height'));
+        } else {
+          var startHeight = targetHeight + $(element).children(cinExpander.collapserSelector).outerHeight();
+        }
+
+        var beforeAnimate = $(element).attr('data-beforeanimate');
+        if(typeof(beforeAnimate) != 'undefined' && typeof(window[beforeAnimate]) == 'function') {
+            if(!window[beforeAnimate](element, 'close', {
+                element: element,
+                state: 'open',
+                startHeight: startHeight,
+                targetHeight: targetHeight
+            }) === false) {
+                return false;
+            }
+        }
+
+        //console.log('Closing: ' + startHeight + ' > ' + targetHeight);
+
+        $(element)
+            .stop(true, true)
+            .addClass('animating closing')
+            .removeClass('open')
+            .css({
+                height: startHeight + 'px'
+            })
+            .animate(
+                {
+                    height: targetHeight + 'px'
+                },
+                cinExpander.animationDuration,
+                'linear',
+                function() {
+                    $(cinExpander.clickerSelector, this).attr('aria-expanded', false);
+
+                    $(this)
+                        .removeAttr('style')
+                        .removeClass('animating closing');
+
+                        var afterAnimate = $(this).attr('data-afteranimate');
+                        if(typeof(window[afterAnimate]) == 'function') {
+                            window[afterAnimate](this, 'close');
+                        }
+                }
+            );
+
+        return true;
+    }
+}

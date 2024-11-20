@@ -1,0 +1,194 @@
+/**
+ * @file
+ * A JavaScript file for the theme.
+ *
+ * In order for this JavaScript to be loaded on pages, see the instructions in
+ * the README.txt next to this file.
+ */
+
+
+// attach cookiebanner styles after cookiebanner is initialized
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+var observer = new MutationObserver(function(mutations, observer) {
+    jQuery.each(mutations, function(k, mutationRecord) {
+      if(mutationRecord.addedNodes.length > 0) {
+        jQuery.each(mutationRecord.addedNodes, function(k2, addedNode) {
+          if(typeof(jQuery(addedNode).attr('data-react-helmet')) != 'undefined') {
+            setTimeout(function() {
+              if(jQuery('style#cookiebar-styles').length < 1) {
+                jQuery('head').append(jQuery('<style>').attr({ id: 'cookiebar-styles', type: 'text/css' }));
+                jQuery.get('/themes/custom/wsp/css/cookiebar/cookiebar.min.css', function(data) {
+                  jQuery('style#cookiebar-styles').html(data);
+                });
+              }
+            }, 500);
+          }
+        });
+      }
+    });
+});
+observer.observe(document.querySelector('head'), { subtree: true, attributes: true, childList: true });
+
+
+
+var qp;
+(function($, Drupal, drupalSettings, window, document, undefined) {
+  Drupal.behaviors.showNotifications = {
+    attach: function (context, settings) {
+      if(typeof(settings.systemMessages) !== 'undefined' && typeof(settings.systemMessages) == 'object') {
+        $.each(settings.systemMessages, function(type, messages) {
+          if(messages.length > 0) {
+            if(window.location.href.indexOf('messages_to_console=true') > -1) {
+              console.log(messages);
+            }            notify(messages.join('<br />'), type);
+          }
+        });
+      }
+
+    }
+  };
+  
+  jQuery(document).ready(function($) {
+    
+    $('.diffuse-cookie-settings').click(function(e) {
+      e.preventDefault();
+    });
+    
+    qp = getQueryParams();
+    
+    $('.slideshow').addClass('slideInDownElipse');
+    
+    var $document = $(document),
+        $element = $('.slideshow'),
+        $header = $('header'),
+        className = 'slideOutUpElipse';
+    
+    $document.scroll(function() {
+      $element.toggleClass(className, $document.scrollTop() >= 100);
+      $element.toggleClass('slideInDownElipse', $document.scrollTop() <= 100);
+      $header.toggleClass('scrolled', $document.scrollTop() >= 100);
+    });
+    
+    $('div.download-wrapper > a.field-group-link').attr('download', 'download');
+    
+    $('[data-columns]').each(function(k, obj) {
+      $(obj).closest('div.contextual-region').addClass('salvattore-context');
+      $(obj).addClass('salvattore-wrapper');
+      var id = 'salvattore-wrapper';
+      var count = 1;
+      while($('#'+id+'-'+count).length > 0) {
+        count ++;
+      }
+      id += '-'+count;
+      $(obj).attr('id', id);
+    });
+    
+    $('img:not(.lazy)').each(function() {
+      var src_attr = $(this).attr('src');
+      $(this).attr('data-src', src_attr);
+      $(this).attr('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+      $(this).addClass('lazy loading');            
+    });
+
+    // IMG Lazy
+    var loadedElements = 0;
+    var lazy = $('img.lazy').Lazy({
+      effect: 'fadeIn',
+      visibleOnly: true,
+      afterLoad: function(element) {
+        loadedElements++;
+        element.removeClass('loading');
+      },            
+      onError: function(element) {
+        element.removeClass('loading');
+        element.attr('src', element.data('src')); 
+      }
+    });
+
+    header = $('header');
+
+    $('header #mobile-menu-toggler').on('click', function(e) {
+      e.preventDefault();
+      $(this).toggleClass('focus');
+      header.find('div.block.menu--main .menu-wrapper').toggle(200, 'easeInOutQuart');      
+      triggerMenuNavFlag = true;
+    });
+    
+    $('header #mobile-language-toggler').on('click', function(e) {
+      e.preventDefault();
+      $(this).toggleClass('blur focus');
+//      header.find('div.block.block-language ul.links').toggle(200);      
+      triggerMenuNavFlag = true;
+    });
+    
+    // Collapsable searchblock
+    if (jQuery('body').width() > 0) {
+      $('.block.search').find('.block-inner').find('.block-title').addClass('search-form-title-block');
+        
+        
+      $('.block.search').parent().addClass('search-block-container');
+      $('.search-block-container').mouseover(function() {
+        $(this).addClass('hovering');
+      }).mouseout(function() {
+        $(this).removeClass('hovering');
+      })
+        
+      $('.block.search .toggle').click(function (e) {
+        e.preventDefault();
+        var searchBlock = $('.block-search form .form-item');        
+        if (searchBlock.hasClass('slideState')) {
+            $('.block.search .toggle').removeClass('activeSearch');
+            searchBlock.removeClass('slideState');
+            $('header').removeClass('active');
+        } else {
+            searchBlock.addClass('slideState');
+            $('header').addClass('active');
+            $('.block.search .toggle').toggleClass('activeSearch');
+            setTimeout(function() {
+              $('#edit-search-api-fulltext').focus();
+            }, 100);
+        }
+      });
+    } else {
+      var searchBlock = $('.block-search form .form-item');
+      searchBlock.addClass('slideState');
+      $('.block.search .toggle').addClass('activeSearch');
+      setTimeout(function() {
+        $('#edit-search-api-fulltext').focus();
+      }, 100);
+    }
+    
+  });
+  
+})(jQuery, Drupal, drupalSettings, this, this.document, undefined);
+
+function getQueryParams(qs) {
+  if(typeof(qs) == 'undefined') {
+    qs = document.location.search;
+  }
+  qs = qs.split("+").join(" ");
+  var params = {};
+  var tokens;
+  var re = /[?&]?([^=]+)=([^&]*)/g;
+
+  while(tokens = re.exec(qs)) {
+    params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+  }
+
+  return params;
+}
+
+function alertBarMsgs(el) {
+  el.children().first().addClass('active');
+
+  var start = new Date();
+
+  setInterval(function() {
+    jQuery(el.find('.active').removeClass('active'));
+    jQuery(el.children()[Math.floor(Math.random()*el.children().length)]).addClass('active');
+  }, 5000);
+}
+
+var alertbar = jQuery('.field--name-field-alertbar');
+if (alertbar)
+  alertBarMsgs(alertbar);
